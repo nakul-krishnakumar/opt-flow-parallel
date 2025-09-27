@@ -31,19 +31,13 @@ Update schemes:
 - OpenCV (core, imgproc, highgui)
 - OpenMP (for the parallel build)
 
-## Build
-Linux:
-- mkdir -p build
-- cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-- cmake --build build -j
-
-Note: If CMake target name differs, adjust the run command below accordingly.
-
 ## Run
-- Ensure you have two grayscale images, e.g., data/rm1.jpg and data/rm2.jpg
-- mkdir -p output
-- ./build/optical_flow <frame1> <frame2>
-  - Example: ./build/optical_flow ./data/rm1.jpg ./data/rm2.jpg
+- Ensure you have two images in `data` directory, e.g., `data/rm1.jpg` and `data/rm2.jpg`
+
+- ```bash
+    chmod +x run.sh
+    ./run.sh
+    ```
 
 The program will:
 - Print serial and parallel timing
