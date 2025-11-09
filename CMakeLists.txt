@@ -9,8 +9,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS} include)
 
-# Source files
-file(GLOB SOURCES src/*.cpp)
+# Source files (exclude opt_flow_mpi.cpp as it has its own main and uses MPI)
+file(GLOB SOURCES src/opt_flow_serial.cpp src/opt_flow_parallel.cpp)
 
 add_executable(opt-flow-parallel main.cpp ${SOURCES})
 target_link_libraries(opt-flow-parallel ${OpenCV_LIBS})

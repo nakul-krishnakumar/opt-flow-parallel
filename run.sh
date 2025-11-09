@@ -25,5 +25,63 @@ if [[ -z "$EXE" ]]; then
   exit 1
 fi
 
-# Run with sample inputs
-"$EXE" ./data/rm1.jpg ./data/rm2.jpg
+# Usage/help
+usage() {
+  cat <<EOF
+Usage: $0 [OPTIONS] [IMAGE1 IMAGE2]
+
+Builds the project (Release) and runs the built executable on two images.
+
+If IMAGE1 and IMAGE2 are provided they will be used. If only one is
+provided the script will prompt for the second. If none are provided the
+script will prompt interactively for both paths.
+
+Options:
+  -h, --help    Show this help message and exit
+
+Examples:
+  $0 ./data/rm1.jpg ./data/rm2.jpg      # run with two images
+  $0                                     # interactive prompt
+EOF
+}
+
+# Parse simple options
+if [[ ${#@} -gt 0 ]]; then
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+  esac
+fi
+
+# Determine images from args or interactive prompt
+IMG1=""
+IMG2=""
+if [[ ${#@} -ge 2 ]]; then
+  IMG1="$1"
+  IMG2="$2"
+elif [[ ${#@} -eq 1 ]]; then
+  IMG1="$1"
+  read -r -p "Enter path for second image: " IMG2
+else
+  read -r -p "Enter path for first image: " IMG1
+  read -r -p "Enter path for second image: " IMG2
+fi
+
+# Trim surrounding quotes/spaces (simple)
+IMG1=$(echo "$IMG1" | sed -e 's/^\s*"\?//;s/"\?\s*$//')
+IMG2=$(echo "$IMG2" | sed -e 's/^\s*"\?//;s/"\?\s*$//')
+
+# Validate image files
+if [[ ! -f "$IMG1" ]]; then
+  echo "Error: image1 not found: $IMG1"
+  exit 2
+fi
+if [[ ! -f "$IMG2" ]]; then
+  echo "Error: image2 not found: $IMG2"
+  exit 2
+fi
+
+echo "Running: $EXE $IMG1 $IMG2"
+"$EXE" "$IMG1" "$IMG2"
