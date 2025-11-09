@@ -295,26 +295,22 @@ int main(int argc, char **argv) {
         cv::Mat u_out(rows, cols, CV_32F, u_full.data());
         cv::Mat v_out(rows, cols, CV_32F, v_full.data());
 
-        // Example: compute flow visualization (angle->hue, magnitude->value)
-        cv::Mat mag, ang;
-        cv::cartToPolar(u_out, v_out, mag, ang, true); // ang in degrees
-        cv::Mat hsv(rows, cols, CV_8UC3);
-        cv::Mat hsv_split[3];
-        // normalize mag to [0,255]
-        cv::Mat mag_n;
-        cv::normalize(mag, mag_n, 0, 255, cv::NORM_MINMAX);
-        mag_n.convertTo(mag_n, CV_8U);
-        ang.convertTo(ang, CV_8U, 0.5); // scale degrees to fit 0-180
-        hsv_split[0] = ang;              // Hue
-        hsv_split[1] = cv::Mat::ones(rows, cols, CV_8U) * 255; // Saturation
-        hsv_split[2] = mag_n;            // Value
-        cv::merge(hsv_split, 3, hsv);
-        cv::Mat bgr;
-        cv::cvtColor(hsv, bgr, cv::COLOR_HSV2BGR);
-        cv::imwrite("flow_vis.png", bgr);
+        // Draw flow vectors in the same style as main.cpp::drawFlow
+        cv::Mat flow_vis = cv::Mat::zeros(rows, cols, CV_8UC3);
+        for (int y = 0; y < rows; y += 5) {
+            for (int x = 0; x < cols; x += 5) {
+                cv::Point2f pt(x, y);
+                cv::Point2f flow(u_out.at<float>(y, x), v_out.at<float>(y, x));
+                cv::line(flow_vis, pt, pt + flow, cv::Scalar(0, 255, 0));
+                cv::circle(flow_vis, pt, 1, cv::Scalar(0, 0, 255), -1);
+            }
+        }
+
+        // Save using the same folder/name pattern as the other outputs
+        cv::imwrite("output/flow_mpi.png", flow_vis);
 
         std::cout << "MPI Horn-Schunck time: " << elapsed_time << " seconds\n";
-        std::cout << "Output flow visualization written to flow_vis.png\n";
+        std::cout << "Output flow visualization written to output/flow_mpi.png\n";
     }
 
     MPI_Finalize();
