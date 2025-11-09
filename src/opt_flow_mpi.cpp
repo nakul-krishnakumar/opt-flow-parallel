@@ -163,6 +163,9 @@ int main(int argc, char **argv) {
     int prev = (rank == 0) ? MPI_PROC_NULL : rank - 1;
     int next = (rank == comm_sz-1) ? MPI_PROC_NULL : rank + 1;
 
+    // Start timing
+    double start_time = MPI_Wtime();
+
     // Iterations
     for (int iter = 0; iter < iterations; ++iter) {
         // Exchange halo rows for u
@@ -188,7 +191,6 @@ int main(int argc, char **argv) {
         // Now compute Jacobi update for local rows
         // For convenience, we treat global boundary rows specially:
         // global_y = start_row + y
-        #pragma omp parallel for collapse(2) schedule(static)
         for (int y = 0; y < local_rows; ++y) {
             for (int x = 1; x < cols - 1; ++x) {
                 int global_y = start_row + y;
@@ -263,6 +265,10 @@ int main(int argc, char **argv) {
         v_next_mat = cv::Mat(local_rows, cols, CV_32F, v_next_buf.data());
     } // end iterations
 
+    // End timing
+    double end_time = MPI_Wtime();
+    double elapsed_time = end_time - start_time;
+
     // Gather u and v back to root using Gatherv (counts in floats)
     std::vector<int> recvcounts(comm_sz), recvdispls(comm_sz);
     for (int r = 0; r < comm_sz; ++r) {
@@ -307,6 +313,7 @@ int main(int argc, char **argv) {
         cv::cvtColor(hsv, bgr, cv::COLOR_HSV2BGR);
         cv::imwrite("flow_vis.png", bgr);
 
+        std::cout << "MPI Horn-Schunck time: " << elapsed_time << " seconds\n";
         std::cout << "Output flow visualization written to flow_vis.png\n";
     }
 

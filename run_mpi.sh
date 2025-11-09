@@ -11,7 +11,7 @@ MPI_EXE="build/opt_flow_mpi"
 
 # Compile the MPI version
 echo "Compiling MPI version..."
-mpic++ -std=c++17 -fopenmp -O3 \
+mpic++ -std=c++17 -O3 \
   -I./include \
   src/opt_flow_mpi.cpp \
   $(pkg-config --cflags --libs opencv4) \
